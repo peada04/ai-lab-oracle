@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    ports:
+      # Host port is configurable; the app always listens on 3000 internally.
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PG_HOST=${PG_HOST:-postgres}
+      - PG_DB=${PG_DB:-ai_lab_oracle}
+      - PG_USER=${PG_USER:-oracle}
+      - "PG_PASSWORD=${PG_PASSWORD:?set PG_PASSWORD in .env}"
+      - "JWT_SECRET=${JWT_SECRET:?set JWT_SECRET in .env - generate one with openssl rand -hex 32}"
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - LOCAL_AI_URL=${LOCAL_AI_URL:-http://localhost:8000/v1/chat/completions}
+      - LOCAL_AI_MODEL=${LOCAL_AI_MODEL:-local-model}
+      - LOCAL_AI_API_KEY=${LOCAL_AI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=${PG_DB:-ai_lab_oracle}
+      - POSTGRES_USER=${PG_USER:-oracle}
+      - "POSTGRES_PASSWORD=${PG_PASSWORD:?set PG_PASSWORD in .env}"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-oracle} -d ${PG_DB:-ai_lab_oracle}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pgdata:
