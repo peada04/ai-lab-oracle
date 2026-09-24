@@ -12,6 +12,8 @@ Everything runs on your own machine: Postgres for storage, username/password
 auth, and a choice of AI backend. No external services are required beyond
 whichever model provider you pick.
 
+![The Oracle analysing a paper against a lab's hardware specs](docs/screenshot.png)
+
 ## Features
 
 - **Hardware specs** — record your compute, RAM, storage and network; the specs
